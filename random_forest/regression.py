@@ -45,12 +45,12 @@ class RandomForestRegression:
         if self.trees is None:
             print('You must fit the model first.')
             return []
-        else:
-            predictions = [
-                self.__bagging_predict(self.trees, row) 
-                for row in X_array
-            ]
-            return predictions
+
+        predictions = [
+            self.__bagging_predict(self.trees, row) 
+            for row in X_array
+        ]
+        return predictions
 
     def __find_split(self, X_array: np.ndarray, y_array: np.ndarray) -> Dict[str, Any]:
         best = {'cost': np.inf}
@@ -92,28 +92,27 @@ class RandomForestRegression:
             # classes, counts = np.unique(y, return_counts=True)
             return {'leaf': True, 'value': np.mean(y_array)}
 
-        else:
-            # Find a good split for this node
-            move = self.__find_split(X_array, y_array)
-            left_indices = move['left_indices']
-            right_indices = move['right_indices']
+        # Find a good split for this node
+        move = self.__find_split(X_array, y_array)
+        left_indices = move['left_indices']
+        right_indices = move['right_indices']
 
-            # If all values will be put in the same child node, then create leaf node
-            if len(right_indices) == 0:
-                return {'left': True, 'value': np.mean(y_array)}
-            # Else, we'll continue to build out the tree further
-            left = self.__build_tree(X_array[left_indices], y_array[left_indices], depth + 1)
-            right = self.__build_tree(X_array[right_indices], y_array[right_indices], depth + 1)
+        # If all values will be put in the same child node, then create leaf node
+        if len(right_indices) == 0:
+            return {'left': True, 'value': np.mean(y_array)}
+        # Else, we'll continue to build out the tree further
+        left = self.__build_tree(X_array[left_indices], y_array[left_indices], depth + 1)
+        right = self.__build_tree(X_array[right_indices], y_array[right_indices], depth + 1)
 
-            node = {
-                'leaf': False,
-                'feature': move['feature'],
-                'split': move['split'],
-                'cost': move['cost'],
-                'left': left,
-                'right': right
-            }
-            return node
+        node = {
+            'leaf': False,
+            'feature': move['feature'],
+            'split': move['split'],
+            'cost': move['cost'],
+            'left': left,
+            'right': right
+        }
+        return node
 
     def __subsample(self, n_rows: int) -> List[int]:
         # Randomly sample with replacement, according to the sample ratio
@@ -135,8 +134,8 @@ class RandomForestRegression:
         # feature
         if tree['leaf']:
             return tree['value']
+
+        if x_row[tree['feature']] <= tree['split']:
+            return self.__predict_one(tree['left'], x_row)
         else:
-            if x_row[tree['feature']] <= tree['split']:
-                return self.__predict_one(tree['left'], x_row)
-            else:
-                return self.__predict_one(tree['right'], x_row)
+            return self.__predict_one(tree['right'], x_row)
