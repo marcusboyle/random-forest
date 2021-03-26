@@ -53,64 +53,73 @@ class RandomForestRegression:
         return predictions
 
     def __find_split(self, X_array: np.ndarray, y_array: np.ndarray) -> Dict[str, Any]:
-        best = {'cost': np.inf}
+        best_split = {'cost': np.inf}
         n_features = X_array.shape[1]
-        n_features_sample = self.max_features(n_features)
-        # Randomly sample features with replacement
-        feature_indices = random.sample(range(n_features), n_features_sample)
+        n_features_to_sample = self.max_features(n_features)
+        # Randomly sample features (without replacement)
+        feature_indices = random.sample(range(n_features), n_features_to_sample)
 
-        # Loop every possible split of every dimension...
-        for i in feature_indices:  # one for each feature randomly chosen above
-            for split in np.unique(X_array[:, i]):  # For each unique value in the given column, test a split at that value
-                left_indices = np.where(X_array[:, i] <= split)[0]
-                right_indices = np.where(X_array[:, i] > split)[0]
+        # For each randomly chosen feature, test a split at every unique
+        # value for that feature
+        for feature_idx in feature_indices:
+            x_feature = X_array[:, feature_idx]
+            for split in np.unique(x_feature):
+                left_indices = np.where(x_feature <= split)[0]
+                right_indices = np.where(x_feature > split)[0]
 
-                # Compute the cost by combining the TSS for each side of the split
+                # Compute cost by combining the TSS on each side of the split
                 cost = 0
                 for indices in [left_indices, right_indices]:
                     if len(indices) != 0:
                         # TSS is used to measure the variance of each split
-                        TSS = np.sum((y_array[indices] - np.mean(y_array[indices]))**2)
+                        TSS = np.sum(
+                            (y_array[indices] - np.mean(y_array[indices]))**2
+                        )
                         cost += TSS
 
                 # Update values if the cost is less than best cost
-                if cost < best['cost']:
-                    best = {
-                        'feature': i,
+                if cost < best_split['cost']:
+                    best_split = {
+                        'feature': feature_idx,
                         'split': split,
                         'cost': cost,
                         'left_indices': left_indices,
                         'right_indices': right_indices
                     }
-        return best
+        return best_split
 
     def __build_tree(self, X_array: np.ndarray, y_array: np.ndarray, depth: int = 0) -> Dict[str, Any]:
-        # Stopping conditions: max depth reached, or all values remaining are the same
-        # If so generate a leaf node...
-        if depth == self.max_depth or (y_array == y_array[0]).all():
-            # Generate a leaf node...
-            # classes, counts = np.unique(y, return_counts=True)
+        max_depth_reached = depth == self.max_depth
+        all_y_identical = (y_array == y_array[0]).all()
+        # Generate a leaf node if we reach the max depth, or if all remaining
+        # y values remaining are the same (as we cannot split any further)
+        if max_depth_reached or all_y_identical:
             return {'leaf': True, 'value': np.mean(y_array)}
 
         # Find a good split for this node
-        move = self.__find_split(X_array, y_array)
-        left_indices = move['left_indices']
-        right_indices = move['right_indices']
+        best_split = self.__find_split(X_array, y_array)
+        left_indices = best_split['left_indices']
+        right_indices = best_split['right_indices']
 
-        # If all values will be put in the same child node, then create leaf node
+        # If all values will be in the same child node, then create leaf node
         if len(right_indices) == 0:
             return {'left': True, 'value': np.mean(y_array)}
+
         # Else, we'll continue to build out the tree further
-        left = self.__build_tree(X_array[left_indices], y_array[left_indices], depth + 1)
-        right = self.__build_tree(X_array[right_indices], y_array[right_indices], depth + 1)
+        left_node = self.__build_tree(
+            X_array[left_indices], y_array[left_indices], depth + 1
+        )
+        right_node = self.__build_tree(
+            X_array[right_indices], y_array[right_indices], depth + 1
+        )
 
         node = {
             'leaf': False,
-            'feature': move['feature'],
-            'split': move['split'],
-            'cost': move['cost'],
-            'left': left,
-            'right': right
+            'feature': best_split['feature'],
+            'split': best_split['split'],
+            'cost': best_split['cost'],
+            'left': left_node,
+            'right': right_node
         }
         return node
 
