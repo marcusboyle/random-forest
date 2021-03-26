@@ -1,34 +1,31 @@
+# Standard library imports
 import time
+
+# Third party imports
+import yaml
 import numpy as np
-from sklearn.datasets import load_diabetes
-from sklearn.model_selection import train_test_split
+
+# Local imports
+from random_forest.datasets import load_data
 from random_forest.regression import RandomForestRegression
 from random_forest.metrics import calc_Rsq
 
 
-# X, y = load_boston(return_X_y=True)
-X, y = load_diabetes(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=True)
-
-# Hyperparameters
-n_trees = 10
-max_depth = 4
-sample_ratio = 0.6
-
+with open('hyperparams.yaml', 'r') as f:
+    hyperparams = yaml.safe_load(f)
 
 def max_features(n_features): return (n_features - 1) // 3
 
+X_train, X_test, y_train, y_test = load_data()
 
 # Run algorithm
 start_time = time.time()
 print('Running Regression Forest...')
 rf_model = RandomForestRegression(
-    n_trees,
-    max_depth,
-    sample_ratio,
-    max_features
+    **hyperparams,
+    max_features=max_features
 )
-rf_model.fit(X, y)
+rf_model.fit(X_train, y_train)
 
 predictions_train = rf_model.predict(X_train)
 predictions_test = rf_model.predict(X_test)
@@ -45,9 +42,9 @@ from sklearn.ensemble import RandomForestRegressor
 
 
 rf_model = RandomForestRegressor(
-    n_estimators=n_trees,
-    max_depth=max_depth,
-    max_samples=sample_ratio,
+    n_estimators=hyperparams['n_trees'],
+    max_depth=hyperparams['max_depth'],
+    max_samples=hyperparams['sample_ratio'],
     max_features='sqrt'
 )
 rf_model.fit(X_train, y_train)

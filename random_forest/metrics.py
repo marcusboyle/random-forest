@@ -1,4 +1,7 @@
-def calc_Rsq(y_train, y_pred):
+import numpy as np
+
+
+def calc_Rsq(y_train: np.ndarray, y_pred: np.ndarray) -> float:
     # Residual Sum of Squares (i.e. sum of squared errors)
     RSS = ((y_train - y_pred)**2).sum()
     # Total Sum of Squares (proportional to data's variance)
