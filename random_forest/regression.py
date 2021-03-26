@@ -21,6 +21,37 @@ class RandomForestRegression:
         self.max_features = max_features
         self.trees = None
 
+    def fit(self, X_array: np.ndarray, y_array: np.ndarray) -> None:
+        """
+        Train the Random Forest.
+        """
+        assert len(X_array) == len(y_array)
+
+        self.trees = []
+        print(f'Building trees...')
+        n_rows = len(y_array)
+        for _ in range(self.n_trees):
+            # First, select the sample used for this tree
+            sample_indices = self.__subsample(n_rows)
+            X_sample = X_array[sample_indices]
+            y_sample = y_array[sample_indices]
+
+            # Build out the tree and store it
+            tree = self.__build_tree(X_sample, y_sample, depth=0)
+            self.trees.append(tree)
+        print(f'Trees built.')
+
+    def predict(self, X_array: np.ndarray) -> List[float]:
+        if self.trees is None:
+            print('You must fit the model first.')
+            return []
+        else:
+            predictions = [
+                self.__bagging_predict(self.trees, row) 
+                for row in X_array
+            ]
+            return predictions
+
     def __find_split(self, X_array: np.ndarray, y_array: np.ndarray) -> Dict[str, Any]:
         best = {'cost': np.inf}
         n_features = X_array.shape[1]
@@ -83,37 +114,6 @@ class RandomForestRegression:
                 'right': right
             }
             return node
-
-    def fit(self, X_array: np.ndarray, y_array: np.ndarray) -> None:
-        """
-        Train the Random Forest.
-        """
-        assert len(X_array) == len(y_array)
-
-        self.trees = []
-        print(f'Building trees...')
-        n_rows = len(y_array)
-        for _ in range(self.n_trees):
-            # First, select the sample used for this tree
-            sample_indices = self.__subsample(n_rows)
-            X_sample = X_array[sample_indices]
-            y_sample = y_array[sample_indices]
-
-            # Build out the tree and store it
-            tree = self.__build_tree(X_sample, y_sample, depth=0)
-            self.trees.append(tree)
-        print(f'Trees built.')
-
-    def predict(self, X_array: np.ndarray) -> List[float]:
-        if self.trees is None:
-            print('You must fit the model first.')
-            return []
-        else:
-            predictions = [
-                self.__bagging_predict(self.trees, row) 
-                for row in X_array
-            ]
-            return predictions
 
     def __subsample(self, n_rows: int) -> List[int]:
         # Randomly sample with replacement, according to the sample ratio
