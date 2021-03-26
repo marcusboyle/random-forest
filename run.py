@@ -2,8 +2,8 @@ import time
 import numpy as np
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
-from src.rf_regression import RandomForestRegression
-from src.evaluation import calc_Rsq
+from random_forest.regression import RandomForestRegression
+from random_forest.metrics import calc_Rsq
 
 
 # X, y = load_boston(return_X_y=True)
@@ -14,6 +14,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle
 n_trees = 10
 max_depth = 4
 sample_ratio = 0.6
+
+
 def max_features(n_features): return (n_features - 1) // 3
 
 

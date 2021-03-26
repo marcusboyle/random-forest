@@ -1,17 +1,27 @@
-import numpy as np
+# Standard library imports
 import random
+from typing import Union, List, Dict, Any, Callable
+
+# Third party imports
+import numpy as np
 
 
 class RandomForestRegression:
-    def __init__(self, n_trees=100, max_depth=4, sample_ratio=0.6,
-                 max_features=lambda n_features: (n_features - 1) // 3):
+    def __init__(
+        self,
+        n_trees: int = 100,
+        max_depth: int = 4,
+        sample_ratio: float = 0.6,
+        max_features: Callable[[int], int] = lambda n_features: (n_features - 1) // 3
+    ) -> None:
+
         self.n_trees = n_trees
         self.max_depth = max_depth
         self.sample_ratio = sample_ratio
         self.max_features = max_features
         self.trees = None
 
-    def find_split(self, X, y):
+    def find_split(self, X: np.ndarray, y: np.ndarray) -> Dict[str, Any]:
         best = {'cost': np.inf}
         n_features = X.shape[1]
         n_features_sample = self.max_features(n_features)
@@ -67,7 +77,7 @@ class RandomForestRegression:
 
         return best
 
-    def build_tree(self, X, y, depth=0):
+    def build_tree(self, X: np.ndarray, y: np.ndarray, depth: int = 0) -> Dict[str, Any]:
         # Stopping conditions: max depth reached, or all values remaining are the same
         # If so generate a leaf node...
         if depth == self.max_depth or (y == y[0]).all():
@@ -98,7 +108,7 @@ class RandomForestRegression:
             }
             return node
 
-    def fit(self, X, y):
+    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
         """
         Train the Random Forest.
         """
@@ -114,11 +124,11 @@ class RandomForestRegression:
             y_sample = y[sample_indices]
 
             # Build out the tree and store it
-            tree = self.build_tree(X_sample, y_sample, depth=0)  # my addition
+            tree = self.build_tree(X_sample, y_sample, depth=0)
             self.trees.append(tree)
         print(f'Trees built.')
 
-    def predict(self, X):
+    def predict(self, X: np.ndarray) -> List[float]:
         if self.trees is None:
             print('You must fit the model first.')
             return []
@@ -129,20 +139,20 @@ class RandomForestRegression:
             ]
             return predictions
 
-    def subsample(self, n_rows):
+    def subsample(self, n_rows: int) -> List[int]:
         # Randomly sample with replacement, according to the sample ratio
         n_sample = round(n_rows * self.sample_ratio)
         sample_indices = random.choices(range(n_rows), k=n_sample)
         return sample_indices
 
-    def bagging_predict(self, trees, x):
+    def bagging_predict(self, trees: List[dict], x: np.ndarray) -> float:
         # Given a row of x values, make a prediction for y with each tree.
         # The predictions will be averaged to give our overall prediction.
         predictions = [self.predict_one(tree, x) for tree in trees]
         prediction = np.mean(predictions)
         return prediction
 
-    def predict_one(self, tree, x):
+    def predict_one(self, tree: dict, x: np.ndarray) -> float:
         """Does the prediction for a single data point"""
         # If we're at a leaf node, return the value. If not, then move either
         # left or right down the tree, depending on the value of the relevant
