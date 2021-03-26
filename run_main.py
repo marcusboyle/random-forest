@@ -41,5 +41,5 @@ def run_main(hyperparams: Dict[str, Union[int, float]]) -> None:
 if __name__ == '__main__':
     with open('hyperparams.yaml', 'r') as f:
         hyperparams = yaml.safe_load(f)
-    
+
     run_main(hyperparams)
