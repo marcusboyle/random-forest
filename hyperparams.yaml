@@ -1,7 +1,7 @@
 # This file contains random forest hyperparameters, plus a brief
 # explanation of their purpose.
 
-# Number of trees that will make up the random forest. Ading more trees tends
+# Number of trees that will make up the random forest. Adding more trees tends
 # to increase predictive power and reduce overfitting, coming at the cost of
 # additional computation. There are likely to be diminishing returns as this
 # number becomes large.
@@ -14,7 +14,7 @@ n_trees: 10
 max_depth: 4
 
 # A value between 0 - 1, representing the proportion of the total data to
-# sample for each tree. Lowering this below 1 will limit the data available
-# for each tree, which will reduce their predictive power individually - but
-# on aggregate may help to reduce overfitting.
+# sample for each tree (bootstrapping). Lowering this below 1 will limit the
+# data available for each tree, which will reduce their predictive power
+# individually - but on aggregate may help to reduce overfitting.
 sample_ratio: 0.6
