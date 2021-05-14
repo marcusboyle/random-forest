@@ -31,8 +31,8 @@ class RandomForestRegression:
         print(f'Building trees...')
         n_rows = len(y_array)
         for _ in range(self.n_trees):
-            # First, select the sample used for this tree
-            sample_indices = self.__subsample(n_rows)
+            # First, retrieve the bootstap sample used for this tree
+            sample_indices = self.__get_bootstrap_sample(n_rows)
             X_sample = X_array[sample_indices]
             y_sample = y_array[sample_indices]
 
@@ -123,7 +123,7 @@ class RandomForestRegression:
         }
         return node
 
-    def __subsample(self, n_rows: int) -> List[int]:
+    def __get_bootstrap_sample(self, n_rows: int) -> List[int]:
         # Randomly sample with replacement, according to the sample ratio
         n_sample = round(n_rows * self.sample_ratio)
         sample_indices = random.choices(range(n_rows), k=n_sample)
