@@ -35,8 +35,8 @@ def run_sklearn(hyperparams: Dict[str, Union[int, float]]) -> None:
     # Evaluate training and testing performance
     Rsq_train = calc_Rsq(y_train, y_preds_train)
     Rsq_test = calc_Rsq(y_test, y_preds_test)
-    print(f'Train accuracy: {Rsq_train*100:.2f}%')
-    print(f'Test accuracy: {Rsq_test*100:.2f}%')
+    print(f'Train R2: {Rsq_train * 100:.2f}%')
+    print(f'Test R2: {Rsq_test * 100:.2f}%')
 
 
 if __name__ == '__main__':
