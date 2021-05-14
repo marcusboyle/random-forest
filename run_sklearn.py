@@ -4,6 +4,7 @@ from typing import Dict, Union
 
 # Third party imports
 import yaml
+from numpy.random import seed
 from sklearn.ensemble import RandomForestRegressor
 
 # Local imports
@@ -12,7 +13,7 @@ from random_forest.metrics import calc_Rsq
 
 
 def run_sklearn(hyperparams: Dict[str, Union[int, float]]) -> None:
-    X_train, X_test, y_train, y_test = load_data()
+    X_train, X_test, y_train, y_test = load_data(dataset_name='boston')
 
     start_time = time.time()
     print('\nRunning Regression Forest...')
@@ -43,4 +44,5 @@ if __name__ == '__main__':
     with open('hyperparams.yaml', 'r') as f:
         hyperparams = yaml.safe_load(f)
 
+    seed(1)  # ensures output is constant between runs
     run_sklearn(hyperparams)
