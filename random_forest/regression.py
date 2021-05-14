@@ -103,7 +103,7 @@ class RandomForestRegression:
 
         # If all values will be in the same child node, then create leaf node
         if len(right_indices) == 0:
-            return {'left': True, 'value': np.mean(y_array)}
+            return {'leaf': True, 'value': np.mean(y_array)}
 
         # Else, we'll continue to build out the tree further
         left_node = self.__build_tree(
